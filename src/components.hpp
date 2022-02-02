@@ -4,6 +4,32 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+struct Box {
+	std::vector <std::vector<Tile>> tiles;
+};
+
+enum TileState
+{
+	S = 0,
+	F = 1,
+	V = 2,
+	O = 3, // possible types of object in future milestone
+	E = 99,
+};
+
+struct Tile
+{
+	int tileState = TileState::E;
+};
+
+// Mesh datastructure for cube
+struct MeshBox
+{
+	//added
+	bool loadFromExcelFile(std::string filename, std::vector <std::vector<Tile>>& out_tiles);
+	std::vector <std::vector<Tile>> tiles;
+};
+
 // Player component
 struct Player
 {

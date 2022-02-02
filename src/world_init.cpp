@@ -31,5 +31,7 @@ Entity createBox()
 		 EFFECT_ASSET_ID::BOX,
 		 GEOMETRY_BUFFER_ID::CUBE });
 
+	MeshBox& meshbox = renderer->getMeshBox(GEOMETRY_BUFFER_ID::CUBE);
+
 	return entity;
 }
