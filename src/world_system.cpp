@@ -102,11 +102,16 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
-	box = createBox();
-	// set default rotation
-	Rotation boxRotation;
-	boxRotation.model = mat4(1.0f);
-	registry.rotation.insert(box, boxRotation);
+	// TODO: implement level select (maybe here)
+	cube.loadFromExcelFile(level_path("level2.csv"));
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < cube.size; j++) {
+			for (int k = 0; k < cube.size; k++) {
+				if (!(cube.faces[i][j][k].tileState == TileState::E))
+					createTile(cube.faces[i][j][k]);
+			}
+		}
+	}
 
 	// // Playing background music indefinitely
 	// Mix_PlayMusic(background_music, -1);
@@ -126,26 +131,30 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	if (key == GLFW_KEY_UP) {
-		Rotation& rotate = registry.rotation.get(box);
-		if (rotate.status == BOX_ANIMATION::STILL)
-			rotate.status = BOX_ANIMATION::UP;
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::UP;
+		}
 	}
 
 	else if (key == GLFW_KEY_DOWN) {
-		Rotation& rotate = registry.rotation.get(box);
-		if (rotate.status == BOX_ANIMATION::STILL)
-			rotate.status = BOX_ANIMATION::DOWN;
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::DOWN;
+		}
 	}
 
 	else if (key == GLFW_KEY_LEFT) {
-		Rotation& rotate = registry.rotation.get(box);
-		if (rotate.status == BOX_ANIMATION::STILL)
-			rotate.status = BOX_ANIMATION::LEFT;
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::LEFT;
+		}
 	}
 
 	else if (key == GLFW_KEY_RIGHT) {
-		Rotation& rotate = registry.rotation.get(box);
-		if (rotate.status == BOX_ANIMATION::STILL)
-			rotate.status = BOX_ANIMATION::RIGHT;
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::RIGHT;
+		}
 	}
 }

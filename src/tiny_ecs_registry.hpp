@@ -16,7 +16,7 @@ public:
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<vec3> colors;
-	ComponentContainer<Rotation> rotation;
+	ComponentContainer<Tile> tiles;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -26,7 +26,7 @@ public:
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&colors);
-		registry_list.push_back(&rotation);
+		registry_list.push_back(&tiles);
 	}
 
 	void clear_all_components() {

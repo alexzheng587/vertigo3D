@@ -10,6 +10,85 @@
 
 float death_timer_counter_ms = 3000;
 
+glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
+	glm::mat4 matrix = glm::mat4(1.0f);
+	// rotate then translate
+	switch (face) {
+		case 0:
+			matrix = translate(glm::mat4(1.0f), vec3(x, y, distance)) * matrix;
+			break;
+		case 1:
+			matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
+			matrix = translate(glm::mat4(1.0f), vec3(-distance, x, y)) * matrix;
+			break;
+		case 2:
+			matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
+			matrix = translate(glm::mat4(1.0f), vec3(distance, x, y)) * matrix;
+			break;
+		case 3:
+			matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+			matrix = translate(glm::mat4(1.0f), vec3(x, distance, y)) * matrix;
+			break;
+		case 4:
+			matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+			matrix = translate(glm::mat4(1.0f), vec3(x, -distance, y)) * matrix;
+			break;
+		case 5:
+			matrix = translate(glm::mat4(1.0f), vec3(x, y, -distance)) * matrix;
+			break;
+		default:
+			break;
+	}
+	return matrix;
+}
+
+// load tiles from excel file, also set the model matrix of each tile (rotate -> translate)
+// order of faces: front, left, 
+bool Cube::loadFromExcelFile(std::string filename) {
+	std::ifstream file(filename);
+
+	if(!file) {
+        printf("Failed to open the file\n");
+        return false;
+    }
+
+	std::string sizeStr;
+	std::getline(file, sizeStr);
+	size = stoi(sizeStr);
+	float distance = size / 2.0f;
+
+	std::string line;
+	for (int i = 0; i < 6; i++) {
+		float y = size / 2;
+		if (size % 2 == 0) y -= 0.5f;
+		int rows = 0;
+		while (std::getline(file, line)) {
+			float x = (-size / 2);
+			if (size % 2 == 0) x += 0.5f;
+			std::string value;
+			std::stringstream ss(line);
+			std::vector<Tile> row;
+			row.reserve(size);
+			while (std::getline(ss, value, ','))
+			{
+				Tile tile;
+				tile.model = tileStartingMatrix(i, x, y, distance);
+				tile.tileState = static_cast<TileState>(value[0] - 'A');
+				row.push_back(tile);
+				x += 1.f;
+			}
+			if (row.size() != size) {
+				printf("One of the rows has an incorrect number of tiles\n");
+				return false;
+			}
+			this->faces[i].push_back(row);
+			y -= 1.f;
+			if (++rows == size) break;
+		}
+	}
+	return true;
+}
+
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7
 // (modified to also read vertex color and omit uv and normals)
 bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size)

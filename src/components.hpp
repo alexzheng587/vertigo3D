@@ -1,6 +1,7 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
@@ -21,7 +22,7 @@ struct ColoredVertex
 struct TexturedVertex
 {
 	vec3 position;
-	vec3 texcoord;
+	vec2 texcoord;
 };
 
 // Mesh datastructure for storing vertex and index buffers
@@ -41,11 +42,31 @@ enum class BOX_ANIMATION {
 	RIGHT = 4
 };
 
-struct Rotation
+// Set each character to their placement in the alphabet for easy conversion from the CSV to TileState
+enum class TileState
+{
+	S = 18,
+	F = 5,
+	V = 21,
+	O = 14,
+	E = 4,
+};
+
+struct Tile
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
-	mat4 model;
+	glm::mat4 model;
 	int degrees = 0;
+	TileState tileState = TileState::E;
+};
+
+// represents the entire cube
+// front -> left -> right -> top -> bottom -> back
+struct Cube
+{
+	bool loadFromExcelFile(std::string filename);
+	std::array<std::vector<std::vector<Tile>>, 6> faces;
+	int size = 0;
 };
 
 /**

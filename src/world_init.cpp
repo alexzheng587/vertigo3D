@@ -3,6 +3,7 @@
 
 Entity createPlayer()
 {
+	// TODO: initialize explorer sprite
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object
@@ -20,11 +21,12 @@ Entity createPlayer()
 	return entity;
 }
 
-Entity createBox()
+Entity createTile(Tile tile)
 {
 	Entity entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	registry.tiles.insert(entity, tile);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::BOX,

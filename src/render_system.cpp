@@ -4,22 +4,6 @@
 
 #include "tiny_ecs_registry.hpp"
 
-namespace {
-	mat3 RotateX(float radians)
-	{
-		float c = cosf(radians);
-		float s = sinf(radians);
-		return { { 1.f, 0.f, 0.f },{ 0.f, c, s },{ 0.f, -s, c } };
-	}
-
-	mat3 RotateY(float radians)
-	{
-		float c = cosf(radians);
-		float s = sinf(radians);
-		return { { c, 0.f, -s },{ 0.f, 1.f, 0.f },{ s, 0.f, c } };
-	}
-} // namespace
-
 void RenderSystem::drawTexturedMesh(Entity entity, const mat4 &projection, const mat4 &view)
 {
 	assert(registry.renderRequests.has(entity));
@@ -58,8 +42,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4 &projection, const
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
 		glVertexAttribPointer(
-			in_texcoord_loc, 3, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
 			(void *)sizeof(
 				vec3)); // note the stride to skip the preceeding vertex position
 
@@ -71,12 +56,12 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4 &projection, const
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
-		// use cubemap
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texture_id);
+		// use 2d
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
 		// handle rotation
-		Rotation& boxRotate = registry.rotation.get(entity);
+		Tile& boxRotate = registry.tiles.get(entity);
 		switch (boxRotate.status) {
 			case BOX_ANIMATION::UP:
 				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
@@ -186,12 +171,12 @@ void RenderSystem::draw()
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
 	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
 	glDepthRange(0.00001, 10);
-	glClearColor(0.674, 0.847, 1.0 , 1.0);
+	glClearColor(0, 0, 0, 1.0);
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
@@ -209,7 +194,7 @@ void RenderSystem::draw()
 	}
 
 	// Truely render to the screen
-	drawToScreen();
+	// drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
@@ -218,7 +203,7 @@ void RenderSystem::draw()
 
 mat4 RenderSystem::createViewMatrix()
 {
-	mat4 view = lookAt(vec3(2.0f, 2.0f, 2.0f),
+	mat4 view = lookAt(vec3(6.0f, 6.0f, 6.0f),
 							vec3(0.0f, 0.0f, 0.0f),
 							vec3(0.0f, 1.0f, 0.0f));
 	return view;

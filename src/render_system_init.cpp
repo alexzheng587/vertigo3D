@@ -56,8 +56,8 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	gl_has_errors();
 
 	initScreenTexture();
-	initializeGlCubeMapTextures();
-    // initializeGlTextures();
+	// initializeGlCubeMapTextures();
+    initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
@@ -66,7 +66,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 void RenderSystem::initializeGlTextures()
 {
-	// unused for now
+	// create tile
     glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
     for(uint i = 0; i < texture_paths.size(); i++)
@@ -87,6 +87,8 @@ void RenderSystem::initializeGlTextures()
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions.x, dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		// set the texture wrapping parameters
+		glGenerateMipmap(GL_TEXTURE_2D);
 		gl_has_errors();
 		stbi_image_free(data);
     }
@@ -180,49 +182,22 @@ void RenderSystem::initializeGlGeometryBuffers()
 	//////////////////////////
 	// Initialize sprite
 	// The position corresponds to the center of the texture.
-	std::vector<TexturedVertex> textured_vertices(8);
-	textured_vertices[0].position = { -0.5f, -0.5f, +0.5f };
-	textured_vertices[1].position = { -0.5f, +0.5f, +0.5f };
-	textured_vertices[2].position = { +0.5f, +0.5f, +0.5f };
-	textured_vertices[3].position = { +0.5f, -0.5f, +0.5f };
-	textured_vertices[4].position = { -0.5f, -0.5f, -0.5f };
-	textured_vertices[5].position = { -0.5f, +0.5f, -0.5f };
-	textured_vertices[6].position = { +0.5f, +0.5f, -0.5f };
-	textured_vertices[7].position = { +0.5f, -0.5f, -0.5f };
+	// centered at (0,0)
+	std::vector<TexturedVertex> textured_vertices(4);
+	textured_vertices[0].position = { -0.5f,  -0.5f,  0.0f };
+	textured_vertices[1].position = { -0.5f,  0.5f,  0.0f };
+	textured_vertices[2].position = {  0.5f,  0.5f,  0.0f };
+	textured_vertices[3].position = {  0.5f,  -0.5f,  0.0f };
 
-	textured_vertices[0].texcoord = { -0.5f, -0.5f, +0.5f };
-	textured_vertices[1].texcoord = { -0.5f, +0.5f, +0.5f };
-	textured_vertices[2].texcoord = { +0.5f, +0.5f, +0.5f };
-	textured_vertices[3].texcoord = { +0.5f, -0.5f, +0.5f };
-	textured_vertices[4].texcoord = { -0.5f, -0.5f, -0.5f };
-	textured_vertices[5].texcoord = { -0.5f, +0.5f, -0.5f };
-	textured_vertices[6].texcoord = { +0.5f, +0.5f, -0.5f };
-	textured_vertices[7].texcoord = { +0.5f, -0.5f, -0.5f };
+	textured_vertices[0].texcoord = {  0.0f,  0.0f };
+	textured_vertices[1].texcoord = {  0.0f,  1.0f };
+	textured_vertices[2].texcoord = {  1.0f,  1.0f };
+	textured_vertices[3].texcoord = {  1.0f,  0.0f };
 
 	const std::vector<uint16_t> textured_indices = {
 		// back
-		4, 7, 6,
-		4, 5, 6,
-
-		// right
-		3, 2, 6,
-		3, 7, 6,
-
-		// left
-		0, 4, 5,
-		0, 1, 5,
-
-		// top
-		1, 5, 6,
-		1, 2, 6,
-
-		// front
-		0, 3, 2,
 		0, 1, 2,
-
-		// bottom
-		0, 3, 7,
-		0, 4, 7 };
+		0, 3, 2};
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::CUBE, textured_vertices, textured_indices);
 }
 
