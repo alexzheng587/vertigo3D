@@ -69,6 +69,23 @@ struct Cube
 	int size = 0;
 };
 
+struct Motion
+{
+	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
+	vec3 velocity = {0, 0, 0}; // Used if extrapolating
+	vec3 destination = {0, 0, 0}; // Used if interpolating
+	float remaining_time = 0; // Used if interpolating
+
+	// For rendering 3d coordinates to 2d screen
+	vec3 origin = {0, 0, 0};
+	vec2 x_vector = {cos(radians(30.0f)), sin(radians(30.0f))};
+	vec2 y_vector = {0, 1};
+	vec2 z_vector = {cos(radians(60.0f)), sin(radians(60.0f))};
+	vec3 position = {0, 0, 0};
+	
+	vec2 scale = {10, 10};
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -95,19 +112,22 @@ struct Cube
 
 enum class TEXTURE_ASSET_ID {
 	BOX = 0,
-	TEXTURE_COUNT = BOX + 1
+	EXPLORER = BOX + 1,
+	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	BOX = 0,
-	EFFECT_COUNT = BOX + 1
+	TEXTURED = BOX + 1,
+	EFFECT_COUNT = TEXTURED + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	CUBE = 0,
-	GEOMETRY_COUNT = CUBE + 1
+	SPRITE = 1,
+	GEOMETRY_COUNT = SPRITE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

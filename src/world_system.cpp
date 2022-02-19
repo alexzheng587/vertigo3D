@@ -102,6 +102,9 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
+
+	player = createPlayer(renderer_arg, {window_width_px/2, window_height_px/2, 0}, {0, 0, 0});
+
 	// TODO: implement level select (maybe here)
 	cube.loadFromExcelFile(level_path("level2.csv"));
 	for (int i = 0; i < 6; i++) {
@@ -131,30 +134,57 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	if (key == GLFW_KEY_UP) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::UP;
+		assert(registry.motions.has(player));
+		Motion& player_motion = registry.motions.get(player);
+		if (player_motion.destination == player_motion.position){
+			player_motion.destination += vec3({0, -100, 0});
+			player_motion.remaining_time = 1000;
 		}
+
+		// for (Tile& t : registry.tiles.components) {
+		// 	if (t.status == BOX_ANIMATION::STILL)
+		// 		t.status = BOX_ANIMATION::UP;
+		// }
 	}
 
 	else if (key == GLFW_KEY_DOWN) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::DOWN;
+		Motion& player_motion = registry.motions.get(player);
+		if (player_motion.destination == player_motion.position){
+			player_motion.destination += vec3({0, 100, 0});
+			player_motion.remaining_time = 1000;
 		}
+
+		// for (Tile& t : registry.tiles.components) {
+		// 	if (t.status == BOX_ANIMATION::STILL)
+		// 		t.status = BOX_ANIMATION::DOWN;
+		// }
 	}
 
 	else if (key == GLFW_KEY_LEFT) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::LEFT;
+		Motion& player_motion = registry.motions.get(player);
+		if (player_motion.destination == player_motion.position){
+			player_motion.destination += vec3({-100, 0, 0});
+			player_motion.remaining_time = 1000;
 		}
+
+
+		// for (Tile& t : registry.tiles.components) {
+		// 	if (t.status == BOX_ANIMATION::STILL)
+		// 		t.status = BOX_ANIMATION::LEFT;
+		// }
 	}
 
 	else if (key == GLFW_KEY_RIGHT) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::RIGHT;
+		Motion& player_motion = registry.motions.get(player);
+		if (player_motion.destination == player_motion.position){
+			player_motion.destination += vec3({100, 0, 0});
+			player_motion.remaining_time = 1000;
 		}
+
+
+		// for (Tile& t : registry.tiles.components) {
+		// 	if (t.status == BOX_ANIMATION::STILL)
+		// 		t.status = BOX_ANIMATION::RIGHT;
+		// }
 	}
 }

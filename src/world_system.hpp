@@ -41,6 +41,7 @@ private:
 	// Game state
 	RenderSystem* renderer;
 	Cube cube;
+	Entity player;
 
 	// music references
 	// Mix_Music* background_music;
