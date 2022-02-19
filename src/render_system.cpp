@@ -203,8 +203,8 @@ void RenderSystem::draw()
 
 mat4 RenderSystem::createViewMatrix()
 {
-	mat4 view = lookAt(vec3(6.0f, 6.0f, 6.0f),
-							vec3(0.0f, 0.0f, 0.0f),
+	mat4 view = lookAt(vec3(6.0f, 3.0f, 6.0f),
+							vec3(0.0f, -0.5f, 0.0f),
 							vec3(0.0f, 1.0f, 0.0f));
 	return view;
 }
@@ -212,6 +212,10 @@ mat4 RenderSystem::createViewMatrix()
 mat4 RenderSystem::createProjectionMatrix(int width, int height)
 {
 	mat4 proj = mat4(1.0f);
-	proj = perspective(radians(45.0f), (float)width / height, 0.1f, 100.0f);
+	proj = perspective(radians(50.0f), (float)width / height, 0.1f, 100.0f); 
+	
+	float const aspect = (float)width / (float)height;
+	float const view_distance = 4; // this number should match the dimension of our box;
+	proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
 	return proj;
 }
