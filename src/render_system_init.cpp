@@ -56,8 +56,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	gl_has_errors();
 
 	initScreenTexture();
-	// initializeGlCubeMapTextures();
-    initializeGlTextures();
+	initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
@@ -66,11 +65,10 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 void RenderSystem::initializeGlTextures()
 {
-	// create tile
-    glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
+	glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
-    for(uint i = 0; i < texture_paths.size(); i++)
-    {
+	for (uint i = 0; i < texture_paths.size(); i++)
+	{
 		const std::string& path = texture_paths[i];
 		ivec2& dimensions = texture_dimensions[i];
 
@@ -87,46 +85,15 @@ void RenderSystem::initializeGlTextures()
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, dimensions.x, dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		// set the texture wrapping parameters
-		glGenerateMipmap(GL_TEXTURE_2D);
 		gl_has_errors();
 		stbi_image_free(data);
-    }
-	gl_has_errors();
-}
-
-void RenderSystem::initializeGlCubeMapTextures()
-{
-	// currently this function just maps textures to a cube
-    glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_gl_handles[0]);
-
-	const std::string& path = texture_paths[0];
-	ivec2& dimensions = texture_dimensions[0];
-    for(uint i = 0; i < 6; i++)
-    {
-		stbi_uc* data;
-		data = stbi_load(path.c_str(), &dimensions.x, &dimensions.y, NULL, 4);
-
-		if (data == NULL)
-		{
-			const std::string message = "Could not load the file " + path + ".";
-			fprintf(stderr, "%s", message.c_str());
-			assert(false);
-		}
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, dimensions.x, dimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-		gl_has_errors();
-		stbi_image_free(data);
-    }
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	}
 	gl_has_errors();
 }
 
 void RenderSystem::initializeGlEffects()
 {
-	for(uint i = 0; i < effect_paths.size(); i++)
+	for (uint i = 0; i < effect_paths.size(); i++)
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
@@ -158,13 +125,13 @@ void RenderSystem::initializeGlMeshes()
 		// Initialize meshes
 		GEOMETRY_BUFFER_ID geom_index = mesh_paths[i].first;
 		std::string name = mesh_paths[i].second;
-		Mesh::loadFromOBJFile(name, 
+		Mesh::loadFromOBJFile(name,
 			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices,
 			meshes[(int)geom_index].original_size);
 
 		bindVBOandIBO(geom_index,
-			meshes[(int)geom_index].vertices, 
+			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices);
 	}
 }
@@ -177,12 +144,11 @@ void RenderSystem::initializeGlGeometryBuffers()
 	glGenBuffers((GLsizei)index_buffers.size(), index_buffers.data());
 
 	// Index and Vertex buffer data initialization.
-	// initializeGlMeshes();
+	initializeGlMeshes();
 
 	//////////////////////////
 	// Initialize sprite
 	// The position corresponds to the center of the texture.
-	// centered at (0,0)
 	std::vector<TexturedVertex> textured_vertices(4);
 	textured_vertices[0].position = { -0.5f,  -0.5f,  0.0f };
 	textured_vertices[1].position = { -0.5f,  0.5f,  0.0f };
@@ -196,9 +162,64 @@ void RenderSystem::initializeGlGeometryBuffers()
 
 	const std::vector<uint16_t> textured_indices = {
 		// back
-		0, 1, 2,
+		0, 2, 1,
 		0, 3, 2};
-	bindVBOandIBO(GEOMETRY_BUFFER_ID::CUBE, textured_vertices, textured_indices);
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
+
+	std::vector<LightedVertex> lighting_vertices(4);
+	lighting_vertices[0].position = { -0.5f,  -0.5f,  0.0f };
+	lighting_vertices[1].position = { -0.5f,  0.5f,  0.0f };
+	lighting_vertices[2].position = {  0.5f,  0.5f,  0.0f };
+	lighting_vertices[3].position = {  0.5f,  -0.5f,  0.0f };
+
+	lighting_vertices[0].texcoord = {  0.0f,  0.0f };
+	lighting_vertices[1].texcoord = {  0.0f,  1.0f };
+	lighting_vertices[2].texcoord = {  1.0f,  1.0f };
+	lighting_vertices[3].texcoord = {  1.0f,  0.0f };
+
+	lighting_vertices[0].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[1].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[2].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[3].normal = { 0.f,  0.f,  1.0f };
+
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::LIGHTING, lighting_vertices, textured_indices);
+
+	////////////////////////
+	// Initialize point light
+	std::vector<ColoredVertex> egg_vertices;
+	std::vector<uint16_t> egg_indices;
+	constexpr float z = -0.1f;
+	constexpr int NUM_TRIANGLES = 62;
+
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		const float t = float(i) * M_PI * 2.f / float(NUM_TRIANGLES - 1);
+		egg_vertices.push_back({});
+		egg_vertices.back().position = { 0.5 * cos(t), 0.5 * sin(t), z };
+		egg_vertices.back().color = { 1.0, 1.0, 1.0 };
+	}
+	egg_vertices.push_back({});
+	egg_vertices.back().position = { 0, 0, 0 };
+	egg_vertices.back().color = { 1, 1, 1 };
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		egg_indices.push_back((uint16_t)i);
+		egg_indices.push_back((uint16_t)((i + 1) % NUM_TRIANGLES));
+		egg_indices.push_back((uint16_t)NUM_TRIANGLES);
+	}
+	int geom_index = (int)GEOMETRY_BUFFER_ID::POINT_LIGHT;
+	meshes[geom_index].vertices = egg_vertices;
+	meshes[geom_index].vertex_indices = egg_indices;
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::POINT_LIGHT, meshes[geom_index].vertices, meshes[geom_index].vertex_indices);
+
+	///////////////////////////////////////////////////////
+	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
+	std::vector<vec3> screen_vertices(3);
+	screen_vertices[0] = { -1, -6, 0.f };
+	screen_vertices[1] = { 6, -1, 0.f };
+	screen_vertices[2] = { -1, 6, 0.f };
+
+	// Counterclockwise as it's the default opengl front winding direction.
+	const std::vector<uint16_t> screen_indices = { 0, 1, 2 };
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE, screen_vertices, screen_indices);
 }
 
 RenderSystem::~RenderSystem()
@@ -212,7 +233,7 @@ RenderSystem::~RenderSystem()
 	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
 	gl_has_errors();
 
-	for(uint i = 0; i < effect_count; i++) {
+	for (uint i = 0; i < effect_count; i++) {
 		glDeleteProgram(effects[i]);
 	}
 	// delete allocated resources
@@ -221,12 +242,14 @@ RenderSystem::~RenderSystem()
 
 	// remove all entities created by the render system
 	while (registry.renderRequests.entities.size() > 0)
-	    registry.remove_all_components_of(registry.renderRequests.entities.back());
+		registry.remove_all_components_of(registry.renderRequests.entities.back());
 }
 
 // Initialize the screen texture from a standard sprite
 bool RenderSystem::initScreenTexture()
 {
+	registry.screenStates.emplace(screen_state_entity);
+
 	int framebuffer_width, framebuffer_height;
 	glfwGetFramebufferSize(const_cast<GLFWwindow*>(window), &framebuffer_width, &framebuffer_height);  // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
@@ -311,9 +334,8 @@ bool loadEffectFromFile(
 	}
 	if (!gl_compile_shader(fragment))
 	{
-		fprintf(stderr, "Fragment compilation failed");
+		fprintf(stderr, "Vertex compilation failed");
 		assert(false);
-		gl_has_errors();
 		return false;
 	}
 
@@ -351,4 +373,3 @@ bool loadEffectFromFile(
 
 	return true;
 }
-

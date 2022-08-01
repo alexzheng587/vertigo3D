@@ -1,0 +1,15 @@
+Letter Reference of Tiles:
+
+A: AI enemy
+B: Burnable
+E: Empty
+F: Fire
+I: Invisible
+M: Movable Tile
+N: Non-Interactible
+S: Start
+U: UpTile
+V: Valid
+W: sWitch
+X: Combination Tile (Burnable and Switch)
+Z: End
